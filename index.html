@@ -3,14 +3,10 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GA4 Video Test</title>
 
-  <!-- Google Analytics 4 -->
-  <script async
-    src="https://www.googletagmanager.com/gtag/js?id=G-7R4FHH75LM">
-  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7R4FHH75LM"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
@@ -19,30 +15,81 @@
   </script>
 </head>
 
-<body style="font-family:Arial,sans-serif;
-             max-width:800px;
-             margin:40px auto;
-             padding:20px;">
-
+<body style="font-family:Arial,sans-serif;max-width:800px;margin:40px auto;padding:20px;">
   <h1>GA4 Video Tracking Test</h1>
+  <p>YouTube動画の再生イベントをGA4へ送信するテストです。</p>
 
-  <p>
-    YouTube動画の再生状況を
-    Google Analytics 4で計測するテストです。
-  </p>
+  <div id="player"></div>
+  <p id="status">プレーヤーを読み込み中...</p>
 
-<iframe
-  id="youtube-player"
-  width="100%"
-  height="420"
-  src="https://www.youtube.com/embed/wi_7OA1RbA8?enablejsapi=1&origin=https%3A%2F%2Fnasuken4k.github.io"
-  title="YouTube Video Test"
-  allow="autoplay; encrypted-media; picture-in-picture"
-  allowfullscreen>
-</iframe>
+  <script>
+    let player;
+    let progressTimer;
+    let started = false;
+    const milestones = new Set();
+    const videoUrl = 'https://www.youtube.com/watch?v=wi_7OA1RbA8';
 
-<script src="https://www.youtube.com/iframe_api"></script>
+    // 自動動画計測との重複を避けるため独自のイベント名を使用
+    function sendEvent(name, percent) {
+      gtag('event', name, {
+        video_title: 'Test_Laspe',
+        video_url: videoUrl,
+        video_percent: percent
+      });
+      document.getElementById('status').textContent =
+        '送信したイベント: ' + name + ' (' + percent + '%)';
+      console.log('GA4 event:', name, percent);
+    }
 
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        width: '100%',
+        height: '420',
+        videoId: 'wi_7OA1RbA8',
+        playerVars: { playsinline: 1 },
+        events: {
+          onReady: function() {
+            document.getElementById('status').textContent =
+              '再生準備完了';
+          },
+          onStateChange: onPlayerStateChange
+        }
+      });
+    }
 
+    function onPlayerStateChange(event) {
+      if (event.data === YT.PlayerState.PLAYING) {
+        if (!started) {
+          started = true;
+          sendEvent('custom_video_start', 0);
+        }
+        clearInterval(progressTimer);
+        progressTimer = setInterval(checkProgress, 1000);
+      } else {
+        clearInterval(progressTimer);
+      }
+
+      if (event.data === YT.PlayerState.ENDED) {
+        sendEvent('custom_video_complete', 100);
+        started = false;
+        milestones.clear();
+      }
+    }
+
+    function checkProgress() {
+      const duration = player.getDuration();
+      if (!duration) return;
+
+      const percent = player.getCurrentTime() / duration * 100;
+      for (const point of [10, 25, 50, 75]) {
+        if (percent >= point && !milestones.has(point)) {
+          milestones.add(point);
+          sendEvent('custom_video_progress', point);
+        }
+      }
+    }
+  </script>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>
