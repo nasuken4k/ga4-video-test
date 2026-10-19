@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+  <title>GA4 Video Test</title>
+
+  <!-- Google Analytics 4 -->
+  <script async
+    src="https://www.googletagmanager.com/gtag/js?id=G-7R4FHH75LM">
+  </script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-7R4FHH75LM');
+  </script>
+</head>
+
+<body style="font-family:Arial,sans-serif;
+             max-width:800px;
+             margin:40px auto;
+             padding:20px;">
+
+  <h1>GA4 Video Tracking Test</h1>
+
+  <p>
+    YouTube動画の再生状況を
+    Google Analytics 4で計測するテストです。
+  </p>
+
+  <iframe
+    width="100%"
+    height="420"
+    src="https://www.youtube.com/embed/wi_7OA1RbA8?enablejsapi=1"
+    title="YouTube Video Test"
+    allow="autoplay; encrypted-media; picture-in-picture"
+    allowfullscreen>
+  </iframe>
+
+</body>
+</html>
